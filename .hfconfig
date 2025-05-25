@@ -1,2 +1,3 @@
 [spaces]
 working_dir = /yolo
+sdk = docker
