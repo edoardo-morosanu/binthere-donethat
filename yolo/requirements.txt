@@ -1,6 +1,7 @@
-fastapi>=0.95.0
-uvicorn>=0.22.0
-ultralytics>=8.0.0
-opencv-python-headless>=4.7.0
-pillow>=10.0.0
-contextlib3>=3.10
+fastapi>=0.115.0
+ultralytics>=8.3.0
+numpy
+uvicorn>=0.34.0
+opencv-python-headless>=4.11.0
+pillow>=11.0.0
+python-multipart>=0.0.20

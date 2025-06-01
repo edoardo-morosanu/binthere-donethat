@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 from io import BytesIO
 from PIL import Image
-from contextlib import asynccontextmanager
 import uvicorn
 
 # Initialize FastAPI app
