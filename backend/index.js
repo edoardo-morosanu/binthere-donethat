@@ -6,6 +6,7 @@ const { swaggerUi, specs } = require("./swagger");
 
 // Import routes
 const authRoutes = require("./routes/auth");
+const predictionRoutes = require("./routes/prediction");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get("/", (request, response) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/prediction", predictionRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
