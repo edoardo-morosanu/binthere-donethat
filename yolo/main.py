@@ -91,17 +91,18 @@ async def predict(file: UploadFile = File(...)):
         
         
         # Generate annotated image with only the largest object
-        # results[0].boxes = results[0].boxes[[0]]
-        # annotated_image = results[0].plot()
-        # annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+        results[0].boxes = results[0].boxes[[0]]
+        annotated_image = results[0].plot()
+        annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
 
         # Convert image to a byte format
-        # _, img_bytes = cv2.imencode(".jpg", annotated_image)
-        # return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
+        _, img_bytes = cv2.imencode(".jpg", annotated_image)
+        return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
     
         # Return image and classification data
-        #add this line in return for troubleshooting results "image": StreamingResponse(BytesIO(img_bytes.tobytes())), 
+        #add this line in return for troubleshooting results 
         return {
+            "image": StreamingResponse(BytesIO(img_bytes.tobytes())), 
             "detections": {
                 "main_object": {
                     "class": class_names[int(main_box.cls)],
