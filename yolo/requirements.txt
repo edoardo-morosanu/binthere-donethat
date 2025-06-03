@@ -5,3 +5,5 @@ uvicorn>=0.34.0
 opencv-python-headless>=4.11.0
 pillow>=11.0.0
 python-multipart>=0.0.20
+typing-inspection>=0.4.1
+typing_extensions>=4.13.2
