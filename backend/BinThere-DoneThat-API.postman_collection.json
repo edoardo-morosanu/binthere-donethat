@@ -1,0 +1,770 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789abc",
+		"name": "BinThere-DoneThat API",
+		"description": "Comprehensive API testing collection for BinThere-DoneThat backend authentication system. This collection tests all endpoints in a logical order with proper authentication flow.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Authentication Tests",
+			"item": [
+				{
+					"name": "1. Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has user and token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('user');",
+									"    pm.expect(jsonData).to.have.property('token');",
+									"    pm.expect(jsonData.user).to.have.property('_id');",
+									"    pm.expect(jsonData.user).to.have.property('username');",
+									"    pm.expect(jsonData.user).to.have.property('email');",
+									"    pm.expect(jsonData.user).to.not.have.property('password');",
+									"});",
+									"",
+									"pm.test(\"Save user data for subsequent tests\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+									"    pm.collectionVariables.set(\"userId\", jsonData.user._id);",
+									"    pm.collectionVariables.set(\"userEmail\", jsonData.user.email);",
+									"    pm.collectionVariables.set(\"username\", jsonData.user.username);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{testUsername}}\",\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user account. This creates a test user that will be used throughout the collection."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user and token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('user');",
+									"    pm.expect(jsonData).to.have.property('token');",
+									"});",
+									"",
+									"pm.test(\"Update auth token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with the registered user credentials to obtain a JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('user');",
+									"    pm.expect(jsonData.user).to.have.property('_id');",
+									"    pm.expect(jsonData.user).to.have.property('username');",
+									"    pm.expect(jsonData.user).to.have.property('email');",
+									"    pm.expect(jsonData.user).to.not.have.property('password');",
+									"});",
+									"",
+									"pm.test(\"User data matches registered user\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user._id).to.eql(pm.collectionVariables.get(\"userId\"));",
+									"    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"userEmail\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user information using JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has users array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('users');",
+									"    pm.expect(jsonData.users).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Users array contains registered user\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var testUserId = pm.collectionVariables.get(\"userId\");",
+									"    var userFound = jsonData.users.some(user => user._id === testUserId);",
+									"    pm.expect(userFound).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Users don't contain password field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.users.forEach(user => {",
+									"        pm.expect(user).to.not.have.property('password');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"users"
+							]
+						},
+						"description": "Get all users in the system (requires authentication)."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Update Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"});",
+									"",
+									"pm.test(\"Update password variable for future tests\", function () {",
+									"    pm.collectionVariables.set(\"testPassword\", \"{{newTestPassword}}\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"currentPassword\": \"{{testPassword}}\",\n    \"newPassword\": \"{{newTestPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"password"
+							]
+						},
+						"description": "Update the current user's password."
+					},
+					"response": []
+				}
+			],
+			"description": "Core authentication flow tests including registration, login, and user management."
+		},
+		{
+			"name": "Error & Security Tests",
+			"item": [
+				{
+					"name": "Unauthorized Access (No Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Test that protected endpoints properly reject requests without authentication tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Login Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"wrongpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Test that login properly rejects invalid credentials."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Registration (Duplicate Email)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"duplicateuser\",\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Test that registration properly rejects duplicate email addresses."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Registration (Weak Password)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response has error message about password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"weakpassuser\",\n    \"email\": \"weakpass@example.com\",\n    \"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Test that registration properly validates password strength."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response has error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid.jwt.token"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Test that protected endpoints properly reject invalid JWT tokens."
+					},
+					"response": []
+				}
+			],
+			"description": "Security and error handling tests to ensure proper validation and authentication."
+		},
+		{
+			"name": "Login After Password Change",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Login successful with new password\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('user');",
+							"    pm.expect(jsonData).to.have.property('token');",
+							"});",
+							"",
+							"pm.test(\"Update auth token\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{newTestPassword}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				},
+				"description": "Verify that login works with the new password after password update."
+			},
+			"response": []
+		},
+		{
+			"name": "Cleanup Tests",
+			"item": [
+				{
+					"name": "Delete Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"});",
+									"",
+									"pm.test(\"Clear auth token after deletion\", function () {",
+									"    pm.collectionVariables.set(\"authToken\", \"\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Delete the current user account (cleanup test data)."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify User Deleted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Cannot access deleted user account\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"{{newTestPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Verify that the deleted user cannot login anymore."
+					},
+					"response": []
+				}
+			],
+			"description": "Cleanup tests to remove test data and verify deletion."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set up unique test data for each collection run",
+					"const timestamp = Date.now();",
+					"const randomSuffix = Math.floor(Math.random() * 1000);",
+					"",
+					"// Only set these if they don't already exist",
+					"if (!pm.collectionVariables.get(\"testUsername\")) {",
+					"    pm.collectionVariables.set(\"testUsername\", `testuser_${timestamp}_${randomSuffix}`);",
+					"}",
+					"if (!pm.collectionVariables.get(\"testEmail\")) {",
+					"    pm.collectionVariables.set(\"testEmail\", `testuser_${timestamp}_${randomSuffix}@example.com`);",
+					"}",
+					"if (!pm.collectionVariables.get(\"testPassword\")) {",
+					"    pm.collectionVariables.set(\"testPassword\", \"TestPassword123!\");",
+					"}",
+					"if (!pm.collectionVariables.get(\"newTestPassword\")) {",
+					"    pm.collectionVariables.set(\"newTestPassword\", \"NewTestPassword456!\");",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test to check response time",
+					"pm.test(\"Response time is less than 5000ms\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"// Global test to check that response is JSON (where applicable)",
+					"if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+					"    pm.test(\"Response is valid JSON\", function () {",
+					"        pm.response.to.be.json;",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testUsername",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testPassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "newTestPassword",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
