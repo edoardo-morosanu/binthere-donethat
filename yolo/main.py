@@ -7,6 +7,7 @@ from io import BytesIO
 from PIL import Image
 import uvicorn
 from typing import List, Dict
+from contextlib import asynccontextmanager
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -18,12 +19,13 @@ app = FastAPI(
 # Global variable to store the model
 model = None
 
-@app.on_event("startup")
-async def lifespan():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """Load the YOLO model on startup"""
     global model
     try:
         model = YOLO('YOLO_Waste_Detection_Computer_Vision_Project-yolo11n-50epochs.pt')
+        yield
     except Exception as e:
         raise
 
