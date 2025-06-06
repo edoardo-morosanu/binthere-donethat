@@ -23,7 +23,7 @@ async def lifespan():
     """Load the YOLO model on startup"""
     global model
     try:
-        model = YOLO('yolov8n.pt')
+        model = YOLO('YOLO_Waste_Detection_Computer_Vision_Project-yolo11n-50epochs.pt')
     except Exception as e:
         raise
 
