@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from ultralytics import YOLO
 import cv2
@@ -76,26 +76,29 @@ def get_top_probabilities(box, names, top_k: int = 5) -> List[Dict]:
         return []
 
 async def process_prediction(file: UploadFile):
-    if not file:
-        raise HTTPException(status_code=400, detail="No file uploaded")
-    if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, and JPEG are allowed.")
-    
-    image = Image.open(BytesIO(await file.read()))
-    results = model(image)
-    main_box, class_names = get_main_object(results)
+    try:
+        if not file:
+            raise HTTPException(status_code=400, detail="No file uploaded")
+        if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, and JPEG are allowed.")
+        image = Image.open(BytesIO(await file.read()))
+        results = model(image)
+        main_box, class_names = get_main_object(results)
+        if not main_box:
+            return None, None, None, None
+        top_classes = get_top_probabilities(main_box, class_names)
+        results[0].boxes = results[0].boxes[[0]]
+        annotated_image = results[0].plot()
+        _, img_bytes = cv2.imencode(".jpg", annotated_image)
+        return img_bytes, main_box, class_names, top_classes
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Optionally log the error here
+        raise HTTPException(status_code=400, detail=f"Prediction failed: {str(e)}")
 
-    if not main_box:
-        return None, None, None, None
-    top_classes = get_top_probabilities(main_box, class_names)
-    results[0].boxes = results[0].boxes[[0]]
-    annotated_image = results[0].plot()
-    _, img_bytes = cv2.imencode(".jpg", annotated_image)
-    return img_bytes, main_box, class_names, top_classes
-
-def check_for_main_object(main_box: 'any'):
-    if main_box is None:
-        return JSONResponse(content={"message": "No objects detected"}, status_code=200)
+def main_object_exists(main_box: 'any'):
+    return main_box is not None
 
 @app.post("/predict")
 async def predict(
@@ -139,11 +142,14 @@ async def predict(
         img_bytes, main_box, class_names, top_classes = await process_prediction(file)
 
         # case for no objects detected
-        check_for_main_object(main_box)
+        if(main_object_exists(main_box) == False):
+            return Response(status_code=204)
 
         # return image and classification data 
         return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
-
+    except HTTPException:
+        # FastAPI handles HTTPExceptions
+        raise
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
