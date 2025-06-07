@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header
 from fastapi.responses import JSONResponse, StreamingResponse
 from ultralytics import YOLO
 import cv2
@@ -126,7 +126,7 @@ async def predict(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/predict/annotated")
+@app.post("/predict_annotated")
 async def predict(
     file: UploadFile = File(...),
     x_api_key: str = Header(None)
