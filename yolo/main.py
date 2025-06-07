@@ -8,17 +8,25 @@ from PIL import Image
 import uvicorn
 from typing import List, Dict
 from contextlib import asynccontextmanager
+import logging
 
 API_KEY = "1234"
+
+#logger setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load the YOLO model on startup"""
     global model
     try:
+        logger.info("Loading YOLO model...")
         model = YOLO('YOLO_Waste_Detection_Computer_Vision_Project-yolo11n-50epochs.pt')
+        logger.info("YOLO model loaded successfully.")
         yield
     except Exception as e:
+        logger.error("Failed to load YOLO model: {e}")
         raise
 
 # Initialize FastAPI app
@@ -31,6 +39,7 @@ app = FastAPI(
 
 def check_api_key(api_key: str):
     if api_key != API_KEY:
+        logger.warning("Invalid or missing API key.")
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 def get_main_object(results):
@@ -78,23 +87,27 @@ def get_top_probabilities(box, names, top_k: int = 5) -> List[Dict]:
 async def process_prediction(file: UploadFile):
     try:
         if not file:
+            logger.warning("No file uploaded.")
             raise HTTPException(status_code=400, detail="No file uploaded")
         if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            logger.warning(f"Invalid file type: {file.filename}")
             raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, and JPEG are allowed.")
         image = Image.open(BytesIO(await file.read()))
         results = model(image)
         main_box, class_names = get_main_object(results)
         if not main_box:
+            logger.info("No objects detected in the image.")
             return None, None, None, None
         top_classes = get_top_probabilities(main_box, class_names)
         results[0].boxes = results[0].boxes[[0]]
         annotated_image = results[0].plot()
         _, img_bytes = cv2.imencode(".jpg", annotated_image)
+        logger.info("Annotated image created.")
         return img_bytes, main_box, class_names, top_classes
     except HTTPException:
         raise
     except Exception as e:
-        # Optionally log the error here
+        logger.error(f"Prediction failed: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Prediction failed: {str(e)}")
 
 def main_object_exists(main_box: 'any'):
@@ -106,16 +119,20 @@ async def predict(
     x_api_key: str = Header(None)
 ):
     """Endpoint to handle image uploads and return predictions."""
+    logger.info("Received /predict request.")
     try:
         # case of wrong or missing API key
         check_api_key(x_api_key)
 
-        _, main_box, class_names, top_classes = await process_prediction(file)
+        img_bytes, main_box, class_names, top_classes = await process_prediction(file)
 
         # case for no objects detected
-        check_for_main_object(main_box)
+        if(main_object_exists(main_box) == False):
+            logger.info("No object detected, returning 204.")
+            return Response(status_code=204)
 
         # return classification data 
+        logger.info("Prediction successful, returning result.")
         return {
             "detections": {
                 "main_object": {
@@ -127,6 +144,7 @@ async def predict(
         }
 
     except Exception as e:
+        logger.error(f"Error in /predict endpoint: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/predict_annotated")
@@ -135,6 +153,7 @@ async def predict(
     x_api_key: str = Header(None)
 ):
     """Endpoint to handle image uploads and return predictions with image. Usually used for testing."""
+    logger.info("Received /predict_annotated request.")
     try:
         # case of wrong or missing API key
         check_api_key(x_api_key)
@@ -143,15 +162,18 @@ async def predict(
 
         # case for no objects detected
         if(main_object_exists(main_box) == False):
+            logger.info("No object detected, returning 204.")
             return Response(status_code=204)
 
         # return image and classification data 
+        logger.info("Prediction successful, returning result.")
         return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
     except HTTPException:
         # FastAPI handles HTTPExceptions
         raise
 
     except Exception as e:
+        logger.error(f"Error in /predict_annotated endpoint: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
