@@ -9,8 +9,12 @@ import uvicorn
 from typing import List, Dict
 from contextlib import asynccontextmanager
 import logging
+from dotenv import load_dotenv
+import os
 
-API_KEY = "1234"
+load_dotenv()
+API_KEY = os.getenv("x-api-key")
+print(f"API_KEY: {API_KEY}")
 
 #logger setup
 logging.basicConfig(level=logging.INFO)
