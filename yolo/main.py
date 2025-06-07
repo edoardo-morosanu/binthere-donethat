@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from ultralytics import YOLO
 import cv2
@@ -29,8 +29,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Global variable to store the model
-# model = None
+def check_api_key(api_key: str):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 def get_main_object(results):
     """Identify the main object (largest) from detection results"""
@@ -56,26 +57,45 @@ def get_main_object(results):
     return None, None
 
 def get_top_probabilities(box, names, top_k: int = 5) -> List[Dict]:
-    """Get top probable classifications for the detected object"""
+    """Get top probable alternative classifications for the detected object, excluding the main class."""
     if box is None:
         return []
     
     if hasattr(box, 'probs') and box.probs is not None:
         probs = box.probs.data.tolist()
-        top_indices = np.argsort(probs)[-top_k:][::-1]
+        main_class_id = int(box.cls)
+        # get indexes of top_k probabilities, excluding the main class
+        top_indexes = np.argsort(probs)[::-1]
+        alt_indexes = [i for i in top_indexes if i != main_class_id][:top_k]
         return [
             {"class": names[i], "probability": float(probs[i])}
-            for i in top_indices
+            for i in alt_indexes
         ]
     else:
-        class_id = int(box.cls)
-        return [{
-            "class": names[class_id],
-            "probability": float(box.conf)
-        }]
+        # no alternatives if only one class is predicted
+        return []
 
-#def process_image_and_annotate(file, model):
+async def process_prediction(file: UploadFile):
+    if not file:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+    if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, and JPEG are allowed.")
+    
+    image = Image.open(BytesIO(await file.read()))
+    results = model(image)
+    main_box, class_names = get_main_object(results)
 
+    if not main_box:
+        return None, None, None, None
+    top_classes = get_top_probabilities(main_box, class_names)
+    results[0].boxes = results[0].boxes[[0]]
+    annotated_image = results[0].plot()
+    _, img_bytes = cv2.imencode(".jpg", annotated_image)
+    return img_bytes, main_box, class_names, top_classes
+
+def check_for_main_object(main_box: 'any'):
+    if main_box is None:
+        return JSONResponse(content={"message": "No objects detected"}, status_code=200)
 
 @app.post("/predict")
 async def predict(
@@ -85,57 +105,45 @@ async def predict(
     """Endpoint to handle image uploads and return predictions."""
     try:
         # case of wrong or missing API key
-        if x_api_key != API_KEY:
-            raise HTTPException(status_code=401, detail="Invalid or missing API key")
+        check_api_key(x_api_key)
 
-        # case of no image sent
-        if not file:
-            raise HTTPException(status_code=400, detail="No file uploaded")
-        
-        # case of invalid format of image
-        if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, and JPEG are allowed.")
+        _, main_box, class_names, top_classes = await process_prediction(file)
 
-
-
-        image = Image.open(BytesIO(await file.read()))
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-
-        # get prediction from ML model
-        results = model(image)
-        
-        # get largest object and class names
-        main_box, class_names = get_main_object(results)
-        
         # case for no objects detected
-        if not main_box:
-            return JSONResponse(content={"message": "No objects detected"}, status_code=200)
-        
-        # get top probable classifications
-        top_classes = get_top_probabilities(main_box, class_names)
-        
-        
-        # generate annotated image with only the largest object
-        results[0].boxes = results[0].boxes[[0]]
-        annotated_image = results[0].plot()
-        annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+        check_for_main_object(main_box)
 
-        # convert image to a byte format
-        _, img_bytes = cv2.imencode(".jpg", annotated_image)
-        return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
-
-        # return image and classification data 
+        # return classification data 
         return {
-            "image": StreamingResponse(BytesIO(img_bytes.tobytes())), 
             "detections": {
                 "main_object": {
                     "class": class_names[int(main_box.cls)],
                     "confidence": float(main_box.conf),
-                    "bounding_box": main_box.xyxy[0].tolist(),
                     "alternative_classifications": top_classes
                 }
             }
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/predict/annotated")
+async def predict(
+    file: UploadFile = File(...),
+    x_api_key: str = Header(None)
+):
+    """Endpoint to handle image uploads and return predictions with image. Usually used for testing."""
+    try:
+        # case of wrong or missing API key
+        check_api_key(x_api_key)
+
+        img_bytes, main_box, class_names, top_classes = await process_prediction(file)
+
+        # case for no objects detected
+        check_for_main_object(main_box)
+
+        # return image and classification data 
+        return StreamingResponse(BytesIO(img_bytes.tobytes()), media_type="image/jpeg")
+
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
