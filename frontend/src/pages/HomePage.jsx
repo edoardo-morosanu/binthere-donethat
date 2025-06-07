@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import CountUp from "../components/Countup";
 
 export default function HomePage() {
   useEffect(() => {
@@ -114,15 +115,44 @@ export default function HomePage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-white bg-opacity-20 rounded-lg">
-              <div className="text-3xl font-bold">8M+</div>
+              <div className="text-3xl font-bold">
+                <CountUp
+                  from={0}
+                  to={8}
+                  separator=","
+                  direction="up"
+                  duration={2}
+                  className="text-white"
+                />
+                M+
+              </div>
               <div className="mt-2">Tons of plastic in oceans</div>
             </div>
             <div className="p-6 bg-white bg-opacity-20 rounded-lg">
-              <div className="text-3xl font-bold">1.5B</div>
+              <div className="text-3xl font-bold">
+                <CountUp
+                  from={0}
+                  to={1500000000}
+                  separator=","
+                  direction="up"
+                  duration={2}
+                  className="text-white"
+                />
+              </div>
               <div className="mt-2">Tons landfilled annually</div>
             </div>
             <div className="p-6 bg-white bg-opacity-20 rounded-lg">
-              <div className="text-3xl font-bold">30%</div>
+              <div className="text-3xl font-bold">
+                <CountUp
+                  from={0}
+                  to={30}
+                  separator=","
+                  direction="up"
+                  duration={2}
+                  className="text-white"
+                />
+                %
+              </div>
               <div className="mt-2">CO₂ reduction via recycling</div>
             </div>
           </div>
