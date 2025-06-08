@@ -14,11 +14,12 @@ import os
 
 load_dotenv()
 API_KEY = os.getenv("x-api-key")
-print(f"API_KEY: {API_KEY}")
 
 #logger setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+logger.info(f"API_KEY: {API_KEY}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
