@@ -4,6 +4,19 @@ const cors = require("cors");
 const { connectDB } = require("./config/database");
 const { swaggerUi, specs } = require("./swagger");
 
+// Validate required environment variables
+const requiredEnvVars = ["JWT_SECRET", "MONGODB_URI", "YOLO_API_KEY"];
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error(
+    "❌ Missing required environment variables:",
+    missingEnvVars.join(", ")
+  );
+  console.error("Please check your .env file");
+  process.exit(1);
+}
+
 // Import routes
 const authRoutes = require("./routes/auth");
 const predictionRoutes = require("./routes/prediction");
@@ -31,8 +44,8 @@ app.use(
 // Home route
 app.get("/", (request, response) => {
   response.send(`
-    <h1>BinThere-DoneThat Authentication API</h1>
-    <p>Welcome to the authentication API!</p>
+    <h1>BinThere-DoneThat API</h1>
+    <p>Welcome to the BinThere-DoneThat API with AI-powered waste classification!</p>
     <p><a href="/api/docs">📚 View API Documentation</a></p>
   `);
 });

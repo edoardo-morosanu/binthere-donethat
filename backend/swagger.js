@@ -5,10 +5,10 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "BinThere-DoneThat Authentication API",
+      title: "BinThere-DoneThat API",
       version: "1.0.0",
       description:
-        "A secure JWT-based authentication API with user management capabilities",
+        "A secure JWT-based authentication API with AI-powered waste classification using YOLO model",
     },
     servers: [
       {
@@ -20,6 +20,10 @@ const options = {
       {
         name: "Authentication",
         description: "User authentication and management",
+      },
+      {
+        name: "Prediction",
+        description: "AI-powered waste classification using YOLO model",
       },
     ],
     components: {
@@ -62,6 +66,12 @@ const options = {
               format: "date-time",
               description: "User last update date",
               example: "2024-01-01T00:00:00.000Z",
+            },
+            itemsSortedCount: {
+              type: "integer",
+              description:
+                "Number of waste items successfully sorted by user following AI recommendations",
+              example: 5,
             },
           },
         },

@@ -48,6 +48,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    itemsSortedCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
