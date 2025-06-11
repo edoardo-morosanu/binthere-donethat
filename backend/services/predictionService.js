@@ -3,81 +3,123 @@ const FormData = require("form-data");
 
 class PredictionService {
   constructor() {
-    this.predictionApiUrl = "http://localhost:8000/predict";
+    this.baseUrl = process.env.YOLO_API_URL || "http://localhost:8000";
+    this.apiKey = process.env.YOLO_API_KEY;
+
+    if (!this.apiKey) {
+      console.warn("YOLO_API_KEY not found in environment variables");
+    }
   }
 
   /**
-   * Send a file to the prediction API
-   * @param {Buffer} fileBuffer - The file buffer to send
-   * @param {string} filename - The original filename
-   * @param {string} mimetype - The file MIME type
-   * @returns {Promise<Object>} The prediction response
+   * Send a file to the prediction API (JSON response)
    */
   async predictFromFile(fileBuffer, filename, mimetype) {
-    try {
-      const formData = new FormData();
-      formData.append("file", fileBuffer, {
-        filename: filename,
-        contentType: mimetype,
-      });
+    return this._sendPredictionRequest(
+      `${this.baseUrl}/predict`,
+      fileBuffer,
+      filename,
+      mimetype,
+      "json"
+    );
+  }
 
-      const response = await axios.post(this.predictionApiUrl, formData, {
-        headers: {
-          ...formData.getHeaders(),
-          // Don't manually set Content-Type, let FormData handle it
-        },
-        timeout: 30000, // 30 second timeout
+  /**
+   * Send a file to the prediction API (annotated image response)
+   */
+  async predictAnnotatedFromFile(fileBuffer, filename, mimetype) {
+    return this._sendPredictionRequest(
+      `${this.baseUrl}/predict_annotated`,
+      fileBuffer,
+      filename,
+      mimetype,
+      "image"
+    );
+  }
+
+  /**
+   * Internal method to send prediction requests
+   * @private
+   */ async _sendPredictionRequest(
+    url,
+    fileBuffer,
+    filename,
+    mimetype,
+    expectedResponseType
+  ) {
+    try {
+      if (!this.apiKey) {
+        throw new Error(
+          "YOLO API key is not configured. Please set YOLO_API_KEY in your .env file."
+        );
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileBuffer, { filename, contentType: mimetype });
+
+      const response = await axios.post(url, formData, {
+        headers: { ...formData.getHeaders(), "x-api-key": this.apiKey },
+        timeout: 30000,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        responseType: "arraybuffer", // Since FastAPI returns image bytes
+        responseType: expectedResponseType === "image" ? "arraybuffer" : "json",
+        validateStatus: (status) =>
+          (status >= 200 && status < 300) || status === 204,
       });
 
-      // Check if response is JSON (no objects detected case)
-      const contentType = response.headers["content-type"] || "";
-      if (contentType.includes("application/json")) {
-        const jsonData = JSON.parse(response.data.toString());
+      // Handle 204 No Content (no objects detected)
+      if (response.status === 204) {
         return {
           success: true,
-          isJson: true,
-          data: jsonData,
+          noObjectsDetected: true,
+          message: "No objects detected in the image",
+          status: 204,
+        };
+      }
+
+      // Handle JSON response
+      if (expectedResponseType === "json") {
+        return {
+          success: true,
+          data: response.data,
           status: response.status,
         };
       }
 
-      // Handle image response (annotated image)
+      // Handle image response
       return {
         success: true,
-        isJson: false,
         imageBuffer: Buffer.from(response.data),
-        contentType: contentType,
+        contentType: response.headers["content-type"] || "image/jpeg",
         status: response.status,
       };
     } catch (error) {
       console.error("Prediction API Error:", error.message);
 
       if (error.response) {
-        // Server responded with error status
-        return {
-          success: false,
-          error: error.response.data || "Prediction API returned an error",
-          status: error.response.status,
-        };
-      } else if (error.request) {
-        // Request was made but no response received
         return {
           success: false,
           error:
-            "Prediction API is not responding. Please check if the service is running on localhost:8000",
-          status: 503,
-        };
-      } else {
-        // Something else happened
-        return {
-          success: false,
-          error: "Failed to make prediction request",
-          status: 500,
+            error.response.data?.detail ||
+            error.response.data ||
+            "Prediction API returned an error",
+          status: error.response.status,
         };
       }
+
+      if (error.request) {
+        return {
+          success: false,
+          error: `Prediction API is not responding. Please check if the YOLO service is running on ${this.baseUrl}`,
+          status: 503,
+        };
+      }
+
+      return {
+        success: false,
+        error: error.message || "Failed to make prediction request",
+        status: 500,
+      };
     }
   }
   /**
@@ -87,7 +129,7 @@ class PredictionService {
   async healthCheck() {
     try {
       // Check if the YOLO API is reachable by hitting the docs endpoint (FastAPI provides this automatically)
-      const response = await axios.get("http://localhost:8000/docs", {
+      const response = await axios.get(`${this.baseUrl}/docs`, {
         timeout: 5000,
       });
       return response.status === 200;

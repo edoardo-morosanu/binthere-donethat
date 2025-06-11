@@ -54,6 +54,8 @@ cp .env.example .env
 MONGODB_URI=mongodb://localhost:27017/binthere-donethat
 JWT_SECRET=your-super-secret-jwt-key
 PORT=3001
+YOLO_API_URL=http://localhost:8000
+YOLO_API_KEY=your-yolo-api-key-here
 ```
 
 ## 🚀 Running the Application
@@ -88,6 +90,58 @@ Once the server is running, visit:
 | DELETE | `/api/auth/me`       | Delete user account   |
 | GET    | `/api/auth/users`    | Get all users (admin) |
 
+## 🤖 Prediction Endpoints
+
+| Method | Endpoint                            | Description                                                  | Auth Required |
+| ------ | ----------------------------------- | ------------------------------------------------------------ | ------------- |
+| POST   | `/api/prediction/predict`           | Upload image for object detection (JSON response)            | Optional      |
+| POST   | `/api/prediction/predict-annotated` | Upload image for object detection (annotated image response) | Optional      |
+| POST   | `/api/prediction/confirm-disposal`  | Confirm disposal of waste item (increments user count)       | Required      |
+| GET    | `/api/prediction/health`            | Check if YOLO service is available                           | No            |
+
+### Prediction API Usage
+
+The prediction endpoints connect to a YOLO machine learning service for waste object detection. Both prediction endpoints work without authentication, but when users are logged in and confirm disposal, their usage count is tracked.
+
+**Workflow:**
+
+1. User uploads image to `/predict` or `/predict-annotated`
+2. AI analyzes image and returns classification
+3. User reviews result and decides to dispose accordingly
+4. User clicks "I Have Disposed" which calls `/confirm-disposal` (requires auth)
+5. User's items sorted count is incremented for tracking purposes
+
+**Supported file types**: JPEG, PNG, JPG, WEBP  
+**Maximum file size**: 10MB
+
+#### Authentication Benefits
+
+- **Without login**: Full prediction functionality available
+- **With login**:
+  - Track total number of confirmed disposals via `/confirm-disposal` endpoint
+  - Build usage statistics for environmental impact tracking
+
+#### Items Sorted Count Tracking
+
+When authenticated users confirm disposal of waste items (by calling `/confirm-disposal`), their items sorted count is incremented. This count represents the total number of times the user has successfully used the AI for waste classification and followed through with proper disposal.
+
+**Example disposal confirmation:**
+
+```bash
+curl -X POST http://localhost:3001/api/prediction/confirm-disposal \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Example response:**
+
+```json
+{
+  "success": true,
+  "message": "Disposal confirmed successfully",
+  "userItemsSortedCount": 15
+}
+```
+
 ## 🧪 Testing
 
 The API can be tested using:
@@ -108,6 +162,19 @@ curl -X POST http://localhost:3001/api/auth/register \
   }'
 ```
 
+### Example Prediction Request:
+
+```bash
+# JSON response
+curl -X POST http://localhost:3001/api/prediction/predict \
+  -F "file=@path/to/your/image.jpg"
+
+# Annotated image response
+curl -X POST http://localhost:3001/api/prediction/predict-annotated \
+  -F "file=@path/to/your/image.jpg" \
+  --output annotated_result.jpg
+```
+
 ## 🔒 Security Features
 
 - Password hashing using bcrypt
@@ -119,13 +186,15 @@ curl -X POST http://localhost:3001/api/auth/register \
 
 ## 📝 Environment Variables
 
-| Variable      | Description                    | Default                 |
-| ------------- | ------------------------------ | ----------------------- |
-| `NODE_ENV`    | Environment mode               | `development`           |
-| `PORT`        | Server port                    | `3001`                  |
-| `MONGODB_URI` | MongoDB connection string      | Required                |
-| `JWT_SECRET`  | JWT signing secret             | Required                |
-| `API_URL`     | API base URL for documentation | `http://localhost:3001` |
+| Variable       | Description                    | Default                 |
+| -------------- | ------------------------------ | ----------------------- |
+| `NODE_ENV`     | Environment mode               | `development`           |
+| `PORT`         | Server port                    | `3001`                  |
+| `MONGODB_URI`  | MongoDB connection string      | Required                |
+| `JWT_SECRET`   | JWT signing secret             | Required                |
+| `YOLO_API_URL` | YOLO service URL               | `http://localhost:8000` |
+| `YOLO_API_KEY` | API key for YOLO service       | Required                |
+| `API_URL`      | API base URL for documentation | `http://localhost:3001` |
 
 ## 🤝 Contributing
 
