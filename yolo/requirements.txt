@@ -1,10 +1,10 @@
 fastapi>=0.115.0
-ultralytics>=8.3.0
-numpy
+ultralytics>=8.3.0  # Will auto-use the lighter torch we specify below
+torch==2.2.1+cpu  # CPU-only PyTorch (saves ~3GB)
+torchvision==0.17.1+cpu  # CPU-only
+numpy<2
 uvicorn>=0.34.0
 opencv-python-headless>=4.11.0
 pillow>=11.0.0
 python-multipart>=0.0.20
-typing-inspection>=0.4.1
-typing_extensions>=4.13.2
 python-dotenv>=1.1.0
