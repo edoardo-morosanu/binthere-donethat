@@ -150,7 +150,7 @@ CLASS_TO_BIN = {
 
 def get_bin_for_class(class_name: str) -> str:
     """Maps a detected class to the appropriate waste bin according to Dutch standards"""
-    return CLASS_TO_BIN.get(class_name.lower(), "Restafval")
+    return CLASS_TO_BIN.get(class_name.lower(), "Restafval")
 
 @app.get("/health")
 def health():
