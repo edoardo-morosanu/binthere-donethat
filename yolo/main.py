@@ -118,6 +118,44 @@ async def process_prediction(file: UploadFile):
 def main_object_exists(main_box: 'any'):
     return main_box is not None
 
+CLASS_TO_BIN = {
+    #GFT
+    "apple": "GFT",
+    "banana": "GFT",
+    "potato": "GFT",
+    #Papierbak
+    "paper": "Papierbak",
+    "book": "Papierbak",
+    #PMD
+    "plastic_bottle": "PMD",
+    "plasticbottle": "PMD",
+    "plastic bottle": "PMD",
+    "plastic_cup": "PMD",
+    "plasticcup": "PMD",
+    "plastic cup": "PMD",
+    "soda_can": "PMD",
+    "sodacan": "PMD",
+    "soda can": "PMD",
+    "tin_can": "PMD",
+    "tin can": "PMD",
+    "tincan": "PMD",
+    #Medisch Afval
+    "medical_needle": "Medisch Afval",
+    "medicaleneedle": "Medisch Afval",
+    "syringe": "Medisch Afval",
+    #Glasbak
+    "glass_bottle": "Glasbak",
+    "glassbottle": "Glasbak"
+}
+
+def get_bin_for_class(class_name: str) -> str:
+    """Maps a detected class to the appropriate waste bin according to Dutch standards"""
+    return CLASS_TO_BIN.get(class_name.lower(), "Restafval")
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 @app.post("/predict")
 async def predict(
     file: UploadFile = File(...),
@@ -136,6 +174,8 @@ async def predict(
             logger.info("No object detected, returning 204.")
             return Response(status_code=204)
 
+        main_bin = get_bin_for_class(class_names[int(main_box.cls)])
+
         # return classification data 
         logger.info("Prediction successful, returning result.")
         return {
@@ -143,6 +183,7 @@ async def predict(
                 "main_object": {
                     "class": class_names[int(main_box.cls)],
                     "confidence": float(main_box.conf),
+                    "bin": main_bin,
                     "alternative_classifications": top_classes
                 }
             }
