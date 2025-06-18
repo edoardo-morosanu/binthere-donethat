@@ -127,25 +127,15 @@ CLASS_TO_BIN = {
     "paper": "Papierbak",
     "book": "Papierbak",
     #PMD
-    "plastic_bottle": "PMD",
-    "plasticbottle": "PMD",
     "plastic bottle": "PMD",
-    "plastic_cup": "PMD",
-    "plasticcup": "PMD",
     "plastic cup": "PMD",
-    "soda_can": "PMD",
-    "sodacan": "PMD",
     "soda can": "PMD",
-    "tin_can": "PMD",
     "tin can": "PMD",
-    "tincan": "PMD",
     #Medisch Afval
-    "medical_needle": "Medisch Afval",
-    "medicaleneedle": "Medisch Afval",
+    "medical needle": "Medisch Afval",
     "syringe": "Medisch Afval",
     #Glasbak
-    "glass_bottle": "Glasbak",
-    "glassbottle": "Glasbak"
+    "glass bottle": "Glasbak"
 }
 
 def get_bin_for_class(class_name: str) -> str:
@@ -188,13 +178,16 @@ async def predict(
                 }
             }
         }
+    except HTTPException:
+        # FastAPI handles HTTPExceptions
+        raise
 
     except Exception as e:
         logger.error(f"Error in /predict endpoint: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/predict_annotated")
-async def predict(
+async def predict_annotated(
     file: UploadFile = File(...),
     x_api_key: str = Header(None)
 ):
