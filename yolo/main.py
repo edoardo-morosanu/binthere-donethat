@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     global model
     try:
         logger.info("Loading YOLO model...")
-        model = YOLO('YOLO_Waste_Detection_Computer_Vision_Project-yolo11n-50epochs.pt')
+        model = YOLO('v1.pt')
         logger.info("YOLO model loaded successfully.")
         yield
     except Exception as e:
