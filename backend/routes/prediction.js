@@ -56,10 +56,35 @@ const upload = multer({
  *                 success:
  *                   type: boolean
  *                 message:
- *                   type: string
+ *                   type: string *                 
  *                 data:
  *                   type: object
  *                   description: Detection results from YOLO model
+ *                   properties:
+ *                     detections:
+ *                       type: object
+ *                       properties:
+ *                         main_object:
+ *                           type: object
+ *                           properties:
+ *                             class:
+ *                               type: string
+ *                               description: The predicted class of the main object
+ *                             confidence:
+ *                               type: number
+ *                               description: The confidence score for the prediction
+ *                             alternative_classifications:
+ *                               type: array
+ *                               description: List of alternative classifications for the detected object
+ *                               items:
+ *                                 type: object
+ *                                 properties:
+ *                                   class:
+ *                                     type: string
+ *                                     description: Alternative class name
+ *                                   probability:
+ *                                     type: number
+ *                                     description: Probability score for the alternative class
  *                 filename:
  *                   type: string
  *       400:
