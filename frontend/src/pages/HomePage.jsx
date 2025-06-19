@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CountUp from "../components/Countup";
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../components/TermsOfServiceModal";
 
 export default function HomePage() {
   useEffect(() => {
@@ -19,6 +21,9 @@ export default function HomePage() {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   return (
     <div className="font-inter antialiased text-gray-900">
@@ -193,15 +198,27 @@ export default function HomePage() {
             © 2025 Bin There, Done That
           </Link>
           <div className="space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-[#7de393]">
+            <button
+              type="button"
+              onClick={() => setPrivacyOpen(true)}
+              className="hover:text-[#7de393] bg-transparent border-none outline-none cursor-pointer text-inherit"
+              style={{ background: "none", border: "none", padding: 0 }}
+            >
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-[#7de393]">
+            </button>
+            <button
+              type="button"
+              onClick={() => setTermsOpen(true)}
+              className="hover:text-[#7de393] bg-transparent border-none outline-none cursor-pointer text-inherit"
+              style={{ background: "none", border: "none", padding: 0 }}
+            >
               Terms of Service
-            </a>
+            </button>
           </div>
         </div>
       </footer>
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }

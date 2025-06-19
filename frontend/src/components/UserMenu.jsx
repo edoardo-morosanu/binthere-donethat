@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AuthModal from "./AuthModal";
 import ProfileModal from "./ProfileModal";
+import PrivacyPolicyModal from "./PrivacyPolicyModal";
+import TermsOfServiceModal from "./TermsOfServiceModal";
 import api from "../services/api";
 
 export default function UserMenu() {
   const [user, setUser] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -57,6 +61,8 @@ export default function UserMenu() {
         isOpen={authOpen}
         onClose={() => setAuthOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
       />
       {user && (
         <ProfileModal
@@ -67,6 +73,8 @@ export default function UserMenu() {
           onUserUpdate={setUser}
         />
       )}
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </>
   );
 } 

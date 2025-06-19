@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import api from "../services/api";
 
@@ -11,6 +11,20 @@ function ProfileModal({ isOpen, onClose, user, onLogout, onUserUpdate }) {
   const [delLoading, setDelLoading] = useState(false);
   const [delError, setDelError] = useState("");
   const [manageOpen, setManageOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const token = localStorage.getItem("token");
+      if (token && onUserUpdate) {
+        api
+          .get("/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => onUserUpdate(res.data))
+          .catch(() => {});
+      }
+    }
+  }, [isOpen, onUserUpdate]);
 
   if (!isOpen) return null;
 
