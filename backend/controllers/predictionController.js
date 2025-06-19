@@ -39,7 +39,6 @@ class PredictionController {
 
     return true;
   }
-
   /**
    * Handle file upload and prediction (JSON response)
    */
@@ -54,15 +53,38 @@ class PredictionController {
         mimetype
       );
       if (result.success) {
+        // Check if no objects were detected
+        if (result.noObjectsDetected) {
+          return res.status(200).json({
+            success: true,
+            message: result.message,
+            data: null,
+            filename: originalname,
+          });
+        }
+
+        // Check confidence threshold for low confidence predictions
+        const confidence = result.data?.detections?.main_object?.confidence;
+        if (confidence !== undefined && confidence < 0.75) {
+          return res.status(200).json({
+            success: true,
+            message: "Unsure what the item is, try again with a clearer image",
+            data: {
+              ...result.data,
+              lowConfidence: true,
+              confidence: confidence,
+            },
+            filename: originalname,
+          });
+        }
+
         // Track successful prediction for disposal confirmation
         trackPrediction(req);
 
         return res.status(200).json({
           success: true,
-          message: result.noObjectsDetected
-            ? result.message
-            : "Prediction completed successfully",
-          data: result.noObjectsDetected ? null : result.data,
+          message: "Prediction completed successfully",
+          data: result.data,
           filename: originalname,
         });
       } else {
@@ -88,6 +110,33 @@ class PredictionController {
       if (!this._validateFile(req, res)) return;
 
       const { buffer, originalname, mimetype } = req.file;
+
+      // First get the JSON prediction to check confidence
+      const jsonResult = await predictionService.predictFromFile(
+        buffer,
+        originalname,
+        mimetype
+      );
+
+      // Check confidence threshold before proceeding with annotation
+      if (jsonResult.success && !jsonResult.noObjectsDetected) {
+        const confidence = jsonResult.data?.detections?.main_object?.confidence;
+        if (confidence !== undefined && confidence < 0.75) {
+          return res.status(200).json({
+            success: true,
+            message:
+              "Item in the image could not be classified, please follow the instructions and try again",
+            data: {
+              ...jsonResult.data,
+              lowConfidence: true,
+              confidence: confidence,
+            },
+            filename: originalname,
+          });
+        }
+      }
+
+      // Proceed with annotated prediction
       const result = await predictionService.predictAnnotatedFromFile(
         buffer,
         originalname,

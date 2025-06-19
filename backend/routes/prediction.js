@@ -33,7 +33,9 @@ const upload = multer({
  *     tags: [Prediction]
  *     security:
  *       - bearerAuth: []
- *     description: Authentication is optional. Returns object detection results.
+ *     description: |
+ *       Authentication is optional. Returns object detection results.
+ *       If confidence is below 0.75, returns a message suggesting to try again with a clearer image.
  *     requestBody:
  *       required: true
  *       content:
@@ -56,10 +58,12 @@ const upload = multer({
  *                 success:
  *                   type: boolean
  *                 message:
- *                   type: string *                 
+ *                   type: string
+ *                   description: |
+ *                     Success message or "Unsure what the item is, try again with a clearer image" for low confidence
  *                 data:
  *                   type: object
- *                   description: Detection results from YOLO model
+ *                   description: Detection results from YOLO model (null if no objects detected or low confidence)
  *                   properties:
  *                     detections:
  *                       type: object
@@ -73,6 +77,9 @@ const upload = multer({
  *                             confidence:
  *                               type: number
  *                               description: The confidence score for the prediction
+ *                             bin:
+ *                               type: string
+ *                               description: The appropriate waste bin for disposal
  *                             alternative_classifications:
  *                               type: array
  *                               description: List of alternative classifications for the detected object
@@ -85,6 +92,12 @@ const upload = multer({
  *                                   probability:
  *                                     type: number
  *                                     description: Probability score for the alternative class
+ *                     lowConfidence:
+ *                       type: boolean
+ *                       description: True if confidence is below 0.75 threshold
+ *                     confidence:
+ *                       type: number
+ *                       description: Raw confidence score when lowConfidence is true
  *                 filename:
  *                   type: string
  *       400:
@@ -107,7 +120,9 @@ router.post(
  *     tags: [Prediction]
  *     security:
  *       - bearerAuth: []
- *     description: Authentication is optional. Returns annotated image with detection boxes.
+ *     description: |
+ *       Authentication is optional. Returns annotated image with detection boxes.
+ *       If confidence is below 0.75, returns JSON message suggesting to try again with a clearer image.
  *     requestBody:
  *       required: true
  *       content:
@@ -121,7 +136,7 @@ router.post(
  *                 description: Image file to analyze
  *     responses:
  *       200:
- *         description: Prediction successful - returns annotated image or JSON if no objects detected
+ *         description: Prediction successful - returns annotated image or JSON if no objects detected or low confidence
  *         content:
  *           image/jpeg:
  *             schema:
@@ -136,9 +151,17 @@ router.post(
  *                   type: boolean
  *                 message:
  *                   type: string
+ *                   description: |
+ *                     Success message, "No objects detected" or "Unsure what the item is, try again with a clearer image" for low confidence
  *                 data:
  *                   type: object
  *                   nullable: true
+ *                   description: Detection results (only present for low confidence responses)
+ *                   properties:
+ *                     lowConfidence:
+ *                       type: boolean
+ *                     confidence:
+ *                       type: number
  *                 filename:
  *                   type: string
  *       400:
