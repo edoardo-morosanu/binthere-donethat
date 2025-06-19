@@ -11,6 +11,7 @@ export default function UserMenu() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -23,7 +24,10 @@ export default function UserMenu() {
         .catch(() => {
           setUser(null);
           localStorage.removeItem("token");
-        });
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -39,7 +43,7 @@ export default function UserMenu() {
 
   return (
     <>
-      {user ? (
+      {loading ? null : user ? (
         <button
           className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-[#e0f7f4] hover:bg-[#27a09e] hover:text-white text-[#205374] font-semibold transition-colors focus:outline-none"
           onClick={() => setProfileOpen(true)}

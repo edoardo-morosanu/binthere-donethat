@@ -17,6 +17,7 @@ export default function WasteSorter({ user, setUser }) {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -25,9 +26,16 @@ export default function WasteSorter({ user, setUser }) {
   const handleTab = useCallback((tab) => setActiveTab(tab), []);
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setSelectedFile(file);
     setAnalysisResult(null);
     setConfirmed(false);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
   };  
   
   const handleAnalyze = async () => {
@@ -102,6 +110,14 @@ export default function WasteSorter({ user, setUser }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   return (
     <div className="font-inter antialiased text-gray-900 bg-gradient-to-b from-[#e3f2f1] to-white min-h-screen flex flex-col">
       <Navbar />
@@ -140,7 +156,15 @@ export default function WasteSorter({ user, setUser }) {
                       Click or Drag &amp; Drop to upload
                     </p>
                   ) : (
-                    <p className="text-gray-700">{selectedFile.name}</p>
+                    previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt={selectedFile.name}
+                        className="max-h-60 max-w-full object-contain rounded shadow"
+                      />
+                    ) : (
+                      <p className="text-gray-700">{selectedFile.name}</p>
+                    )
                   )}
                   <input
                     type="file"
