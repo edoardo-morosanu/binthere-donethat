@@ -13,3 +13,13 @@ export default axios.create({
     "Content-Type": "application/json",
   },
 });
+
+export async function confirmDisposal(token) {
+  return await axios.post(
+    "/prediction/confirm-disposal",
+    {},
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+}
