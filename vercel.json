@@ -16,18 +16,12 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/index.js"
-    },
+      "dest": "/backend/index.js"    },
     {
       "src": "/(.*)",
       "dest": "/frontend/build/$1"
     }
   ],
-  "functions": {
-    "backend/index.js": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   }
