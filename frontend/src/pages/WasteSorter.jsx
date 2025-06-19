@@ -1,12 +1,16 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { confirmDisposal } from "../services/api";
 
-export default function WasteSorter() {
+export default function WasteSorter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState("upload");
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -20,17 +24,57 @@ export default function WasteSorter() {
     setConfirmed(false);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!selectedFile) return;
-    // Mock analysis result
-    setAnalysisResult({
-      item: "Plastic Bottle",
-      suggestion: "Place in Recycling Bin",
-    });
+    setLoading(true);
+    setError("");
+    setAnalysisResult(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await fetch("https://binthere-donethat.vercel.app/api/prediction/predict", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!data.success) {
+        setError(data.message || "Prediction failed. Please try again.");
+      } else if (!data.data || !data.data.detections || !data.data.detections.main_object) {
+        setError(data.message || "No recognizable object found. Try another image.");
+      } else {
+        const main = data.data.detections.main_object;
+        setAnalysisResult({
+          item: main.class,
+          suggestion: main.bin,
+          confidence: main.confidence,
+          alternatives: main.alternative_classifications || [],
+          lowConfidence: data.data.lowConfidence || false,
+          lowConfidenceMessage: data.data.lowConfidence ? data.message : undefined,
+        });
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleConfirm = () => {
-    setConfirmed(true);
+  const handleConfirm = async () => {
+    setConfirmLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const res = await confirmDisposal(token);
+        if (res.data && res.data.userItemsSortedCount !== undefined && setUser) {
+          setUser((prev) => ({ ...prev, itemsSortedCount: res.data.userItemsSortedCount }));
+        }
+      }
+      setConfirmed(true);
+    } catch (err) {
+      // Optionally show error
+    } finally {
+      setConfirmLoading(false);
+    }
   };
 
   return (
@@ -76,39 +120,67 @@ export default function WasteSorter() {
                   <input
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={handleFileChange}
                     className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
                 <button
                   onClick={handleAnalyze}
-                  disabled={!selectedFile || analysisResult}
+                  disabled={!selectedFile || analysisResult || loading}
                   className={`w-full font-semibold py-3 rounded-lg transition mb-6 ${
-                    selectedFile && !analysisResult
+                    selectedFile && !analysisResult && !loading
                       ? "bg-[#27a09e] text-white hover:bg-[#205374]"
                       : "bg-gray-300 text-gray-600 cursor-not-allowed"
                   }`}
                 >
-                  Analyze Image
+                  {loading ? "Analyzing..." : "Analyze Image"}
                 </button>
+                {error && (
+                  <div className="w-full text-red-500 text-center mb-4">{error}</div>
+                )}
                 {analysisResult && (
                   <div className="w-full bg-[#d3f5ee] rounded-lg p-6 flex flex-col items-center">
                     {!confirmed ? (
                       <>
-                        <h3 className="text-xl font-semibold text-[#205374] mb-2">
-                          Result:
+                        {analysisResult.lowConfidence && (
+                          <div className="w-full mb-4 p-3 rounded-lg bg-yellow-100 border border-yellow-400 text-yellow-800 text-center font-semibold">
+                            {analysisResult.lowConfidenceMessage || "Couldn't confidently classify this item. Please check the instructions and try again."}
+                          </div>
+                        )}
+                        <h3 className="text-2xl font-bold text-[#205374] mb-4 flex items-center gap-2">
+                          <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-[#27a09e]' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4' /></svg>
+                          Result
                         </h3>
-                        <p className="text-gray-800 mb-4">
-                          Item: {analysisResult.item}
-                        </p>
-                        <p className="text-gray-800 mb-6">
-                          Suggestion: {analysisResult.suggestion}
-                        </p>
+                        <div className="mb-2 text-lg text-gray-800 font-semibold">{analysisResult.item}</div>
+                        <div className="mb-4 text-base text-[#27a09e] font-bold">{analysisResult.suggestion}</div>
+                        <div className="mb-4">
+                          <span className="inline-block bg-gray-200 text-gray-700 text-xs px-3 py-1 rounded-full">Confidence: {(analysisResult.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        {analysisResult.alternatives && analysisResult.alternatives.length > 0 && (
+                          <div className="mb-4 w-full">
+                            <p className="text-gray-700 font-semibold mb-1">Alternatives:</p>
+                            <ul className="list-disc list-inside text-gray-600 text-sm">
+                              {analysisResult.alternatives.map((alt, idx) => (
+                                <li key={idx}>{alt.class} ({(alt.probability * 100).toFixed(1)}%)</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         <button
                           onClick={handleConfirm}
-                          className="bg-[#205374] text-white font-semibold px-6 py-2 rounded-lg hover:bg-[#184754] transition"
+                          disabled={
+                            confirmLoading ||
+                            analysisResult.lowConfidence ||
+                            !analysisResult.item
+                          }
+                          className={`bg-[#205374] text-white font-semibold px-6 py-2 rounded-lg hover:bg-[#184754] transition mt-2 ${
+                            confirmLoading || analysisResult.lowConfidence || !analysisResult.item
+                              ? "opacity-60 cursor-not-allowed"
+                              : ""
+                          }`}
                         >
-                          I Have Disposed
+                          {confirmLoading ? "Confirming..." : "I Have Disposed"}
                         </button>
                       </>
                     ) : (

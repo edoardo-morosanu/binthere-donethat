@@ -68,7 +68,7 @@ class PredictionController {
         if (confidence !== undefined && confidence < 0.75) {
           return res.status(200).json({
             success: true,
-            message: "Unsure what the item is, try again with a clearer image",
+            message: "We couldn't confidently classify this item. Please review the instructions and try again with a clearer image.",
             data: {
               ...result.data,
               lowConfidence: true,
@@ -124,8 +124,7 @@ class PredictionController {
         if (confidence !== undefined && confidence < 0.75) {
           return res.status(200).json({
             success: true,
-            message:
-              "Item in the image could not be classified, please follow the instructions and try again",
+            message: "We couldn't confidently classify this item. Please review the instructions and try again with a clearer image.",
             data: {
               ...jsonResult.data,
               lowConfidence: true,
