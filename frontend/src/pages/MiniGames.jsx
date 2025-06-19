@@ -1,11 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../components/TermsOfServiceModal";
 
 export default function MiniGames() {
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
+
+  const handleBrandClick = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="font-inter antialiased text-gray-900 min-h-screen flex flex-col">
@@ -62,9 +73,13 @@ export default function MiniGames() {
         </section>
       </main>
 
-      <footer className="py-6 bg-[#205374] text-[#d3f5ee] text-center">
-        © 2025 Bin There, Done That
-      </footer>
+      <Footer
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
+        handleBrandClick={handleBrandClick}
+      />
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }

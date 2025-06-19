@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import CountUp from "../components/Countup";
 import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
 import TermsOfServiceModal from "../components/TermsOfServiceModal";
+import Footer from "../components/Footer";
 
 export default function HomePage() {
   useEffect(() => {
@@ -17,13 +18,13 @@ export default function HomePage() {
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+
   const handleBrandClick = useCallback((e) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [termsOpen, setTermsOpen] = useState(false);
 
   return (
     <div className="font-inter antialiased text-gray-900">
@@ -188,35 +189,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="py-6 bg-[#205374] text-[#d3f5ee]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-          <Link
-            to="/"
-            onClick={handleBrandClick}
-            className="text-[#d3f5ee] hover:text-[#7de393]"
-          >
-            © 2025 Bin There, Done That
-          </Link>
-          <div className="space-x-4 mt-4 md:mt-0">
-            <button
-              type="button"
-              onClick={() => setPrivacyOpen(true)}
-              className="hover:text-[#7de393] bg-transparent border-none outline-none cursor-pointer text-inherit"
-              style={{ background: "none", border: "none", padding: 0 }}
-            >
-              Privacy Policy
-            </button>
-            <button
-              type="button"
-              onClick={() => setTermsOpen(true)}
-              className="hover:text-[#7de393] bg-transparent border-none outline-none cursor-pointer text-inherit"
-              style={{ background: "none", border: "none", padding: 0 }}
-            >
-              Terms of Service
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Footer
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
+        handleBrandClick={handleBrandClick}
+      />
       <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
       <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>

@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { confirmDisposal } from "../services/api";
 import apiClient from "../services/api";
+import Footer from "../components/Footer";
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../components/TermsOfServiceModal";
 
 export default function WasteSorter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState("upload");
@@ -12,6 +15,8 @@ export default function WasteSorter({ user, setUser }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -90,6 +95,11 @@ export default function WasteSorter({ user, setUser }) {
     } finally {
       setConfirmLoading(false);
     }
+  };
+
+  const handleBrandClick = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -245,9 +255,13 @@ export default function WasteSorter({ user, setUser }) {
         </div>
       </main>
 
-      <footer className="py-6 bg-[#205374] text-[#d3f5ee] text-center">
-        © 2025 Bin There, Done That
-      </footer>
+      <Footer
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
+        handleBrandClick={handleBrandClick}
+      />
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }

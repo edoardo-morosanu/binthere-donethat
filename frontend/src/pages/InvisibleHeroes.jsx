@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../components/TermsOfServiceModal";
 
 const interviews = [
   {
@@ -40,6 +43,8 @@ const interviews = [
 export default function InvisibleHeroes() {
   const [modalUrl, setModalUrl] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -53,6 +58,11 @@ export default function InvisibleHeroes() {
   const closeModal = () => {
     setModalVisible(false);
     setTimeout(() => setModalUrl(null), 300);
+  };
+
+  const handleBrandClick = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -158,9 +168,13 @@ export default function InvisibleHeroes() {
         </div>
       )}
 
-      <footer className="py-6 bg-[#205374] text-[#d3f5ee] text-center">
-        © 2025 Bin There, Done That
-      </footer>
+      <Footer
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
+        handleBrandClick={handleBrandClick}
+      />
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }
