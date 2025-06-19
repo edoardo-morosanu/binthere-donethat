@@ -16,7 +16,7 @@ export default axios.create({
 
 export async function confirmDisposal(token) {
   return await axios.post(
-    "/api/prediction/confirm-disposal",
+    "/api/prediction/disposal-confirmation",
     {},
     {
       headers: { Authorization: `Bearer ${token}` },
