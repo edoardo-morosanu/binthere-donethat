@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { confirmDisposal } from "../services/api";
+import apiClient from "../services/api";
 
 export default function WasteSorter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState("upload");
@@ -22,8 +23,8 @@ export default function WasteSorter({ user, setUser }) {
     setSelectedFile(e.target.files[0]);
     setAnalysisResult(null);
     setConfirmed(false);
-  };
-
+  };  
+  
   const handleAnalyze = async () => {
     if (!selectedFile) return;
     setLoading(true);
@@ -32,11 +33,21 @@ export default function WasteSorter({ user, setUser }) {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const response = await fetch("https://binthere-donethat.vercel.app/api/prediction/predict", {
-        method: "POST",
-        body: formData,
+      
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "multipart/form-data",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await apiClient.post("/prediction/predict", formData, {
+        headers,
       });
-      const data = await response.json();
+      
+      const data = response.data;
       if (!data.success) {
         setError(data.message || "Prediction failed. Please try again.");
       } else if (!data.data || !data.data.detections || !data.data.detections.main_object) {
@@ -53,7 +64,11 @@ export default function WasteSorter({ user, setUser }) {
         });
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || "Prediction failed. Please try again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

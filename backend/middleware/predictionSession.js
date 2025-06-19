@@ -27,7 +27,11 @@ function generateSessionId(req) {
     return `user_${req.user.id}`;
   }
 
-  const ip = req.ip || req.connection.remoteAddress || "unknown";
+  const ip =
+    req.ip ||
+    req.connection.remoteAddress ||
+    req.headers["x-forwarded-for"] ||
+    "unknown";
   const userAgent = req.get("User-Agent") || "unknown";
   return `anon_${Buffer.from(ip + userAgent).toString("base64")}`;
 }
