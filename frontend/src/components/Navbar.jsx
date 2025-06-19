@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import UserMenu from "./UserMenu";
 
 export default function Navbar() {
   const location = useLocation();
@@ -25,7 +26,7 @@ export default function Navbar() {
           </span>
         </Link>
         {/* Desktop links */}
-        <div className="hidden md:flex space-x-4">
+        <div className="hidden md:flex space-x-4 items-center">
           {links.map(({ to, label }) => {
             const active = location.pathname === to;
             return (
@@ -45,6 +46,8 @@ export default function Navbar() {
               </Link>
             );
           })}
+          {/* User menu on desktop */}
+          <UserMenu />
         </div>
         {/* Hamburger for mobile */}
         <button
@@ -80,6 +83,10 @@ export default function Navbar() {
               </Link>
             );
           })}
+          {/* User menu on mobile */}
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <UserMenu />
+          </div>
         </div>
       )}
     </nav>
