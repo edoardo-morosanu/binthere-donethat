@@ -6,7 +6,7 @@ const API_BASE_URL =
     ? "/api"
     : "http://localhost:3001/api");
 
-export default axios.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
@@ -14,9 +14,11 @@ export default axios.create({
   },
 });
 
+export default apiClient;
+
 export async function confirmDisposal(token) {
-  return await axios.post(
-    "/api/prediction/disposal-confirmation",
+  return await apiClient.post(
+    "/prediction/disposal-confirmation",
     {},
     {
       headers: { Authorization: `Bearer ${token}` },

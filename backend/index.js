@@ -23,6 +23,9 @@ const predictionRoutes = require("./routes/prediction");
 
 const app = express();
 
+// Trust proxy (important for IP detection when behind proxies like Vercel)
+app.set("trust proxy", true);
+
 // Connect to MongoDB
 connectDB();
 
