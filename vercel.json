@@ -14,6 +14,34 @@
     }
   ],  "routes": [
     {
+      "src": "/api/docs/swagger-ui.css",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css"
+    },
+    {
+      "src": "/api/docs/swagger-ui-bundle.js",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js"
+    },
+    {
+      "src": "/api/docs/swagger-ui-standalone-preset.js",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js"
+    },
+    {
+      "src": "/swagger-ui.css",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css"
+    },
+    {
+      "src": "/swagger-ui-bundle.js",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js"
+    },
+    {
+      "src": "/swagger-ui-standalone-preset.js",
+      "dest": "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js"
+    },
+    {
+      "src": "/api/docs/swagger-ui-init.js",
+      "dest": "/backend/index.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/backend/index.js"
     },

@@ -1,5 +1,6 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const path = require("path");
 
 const options = {
   definition: {
@@ -14,6 +15,10 @@ const options = {
       {
         url: "http://localhost:3001",
         description: "Development server",
+      },
+      {
+        url: "https://your-domain.vercel.app",
+        description: "Production server",
       },
     ],
     tags: [
@@ -179,7 +184,11 @@ const options = {
       },
     ],
   },
-  apis: ["./routes/*.js", "./models/*.js", "./controllers/*.js"], // Path to the API docs
+  apis: [
+    path.join(__dirname, "./routes/*.js"),
+    path.join(__dirname, "./models/*.js"),
+    path.join(__dirname, "./controllers/*.js"),
+  ], // Path to the API docs
 };
 
 const specs = swaggerJsdoc(options);
