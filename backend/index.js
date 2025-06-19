@@ -66,9 +66,15 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(
-    `API Documentation available at http://localhost:${PORT}/api/docs`
-  );
-});
+
+// For Vercel serverless functions, export the app
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(
+      `API Documentation available at http://localhost:${PORT}/api/docs`
+    );
+  });
+}
