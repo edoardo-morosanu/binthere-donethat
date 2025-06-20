@@ -57,7 +57,7 @@ const stories = [
     context: "Community Organizer",
     preview:
       "We started with five neighbors. Now, every Saturday, dozens join to clear the riverbanks. It's our city, our responsibility.",
-    theme: "Everyday Impact",
+    theme: "Global Crisis",
     imageUrl: "/images/heroes/peru.png",
     videoUrl: "https://www.youtube.com/embed/1nicf4RjU00",
   },
