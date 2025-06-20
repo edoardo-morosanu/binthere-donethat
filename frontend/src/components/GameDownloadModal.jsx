@@ -76,6 +76,16 @@ function GameDownloadModal({ isOpen, onClose, gameInfo }) {
                 href="/downloads/FallingTrash_Mac.zip"
                 download="FallingTrash_Mac.zip"
                 className="inline-block w-full bg-[#0071e3] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#0077ed] transition-colors"
+                onClick={e => {
+                  // Fallback: programmatically trigger download if default fails
+                  e.preventDefault();
+                  const link = document.createElement('a');
+                  link.href = '/downloads/FallingTrash_Mac.zip';
+                  link.download = 'FallingTrash_Mac.zip';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
               >
                 <span className="text-2xl mr-2"></span> Download for macOS
               </a>
