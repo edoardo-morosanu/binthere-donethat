@@ -99,7 +99,7 @@ export default function HomePage() {
               Invisible Heroes
             </h3>
             <p className="text-gray-700">
-              Read first-hand accounts of sanitation staff and their stories.
+              Discover global voices, ordinary people and changemakers, fighting back against a world drowning in waste.
             </p>
             <span className="mt-4 inline-block text-[#27a09e] font-semibold group-hover:text-[#205374]">
               Try It →
@@ -168,22 +168,53 @@ export default function HomePage() {
       <section id="contact" className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-[#205374] mb-4">
-            Get In Touch
+            Do you have a story or feedback? Reach out to us!
           </h2>
           <p className="text-gray-700 mb-6">
-            Questions or feedback? Sign up for updates or send us a message.
+            We'd love to hear from you. Share your story, feedback, or questions below.
           </p>
-          <form className="flex flex-col sm:flex-row gap-4">
+          <form
+            className="flex flex-col gap-4 items-center"
+            style={{ maxWidth: 500, margin: '0 auto' }}
+            onSubmit={e => {
+              e.preventDefault();
+              const form = e.target;
+              const data = {
+                name: form.name.value,
+                email: form.email.value,
+                message: form.message.value,
+              };
+              console.log('Homepage contact form submitted:', data);
+              form.reset();
+              alert('Thank you for reaching out!');
+            }}
+          >
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              required
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+            />
             <input
               type="email"
-              placeholder="Your email"
-              className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+              name="email"
+              placeholder="Your Email"
+              required
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+            />
+            <textarea
+              name="message"
+              placeholder="Your message..."
+              required
+              rows={4}
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
             />
             <button
               type="submit"
               className="bg-[#205374] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#1b4561] transition"
             >
-              Subscribe
+              Send Message
             </button>
           </form>
         </div>
