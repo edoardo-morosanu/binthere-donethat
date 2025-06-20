@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import api from "../services/api";
 
-function AuthModal({ isOpen, onClose, onAuthSuccess }) {
+function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenPrivacyPolicy, onOpenTermsOfService }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   if (!isOpen) return null;
 
@@ -107,11 +108,30 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             required
             minLength={6}
           />
+          {mode === "register" && (
+            <div className="flex items-start space-x-2 text-xs text-gray-600">
+              <input
+                id="agree"
+                type="checkbox"
+                className="mt-1 accent-[#27a09e]"
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                required
+              />
+              <label htmlFor="agree" className="select-none">
+                I agree to the
+                <button type="button" className="underline text-[#205374] hover:text-[#27a09e] px-1" onClick={onOpenPrivacyPolicy}>Privacy Policy</button>
+                and
+                <button type="button" className="underline text-[#205374] hover:text-[#27a09e] px-1" onClick={onOpenTermsOfService}>Terms of Service</button>
+                .
+              </label>
+            </div>
+          )}
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"
             className="w-full py-2 rounded-lg bg-[#205374] text-white font-semibold hover:bg-[#27a09e] transition-colors disabled:opacity-60"
-            disabled={loading}
+            disabled={loading || (mode === "register" && !agreed)}
           >
             {loading ? (mode === "login" ? "Logging in..." : "Registering...") : mode === "login" ? "Login" : "Register"}
           </button>

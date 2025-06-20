@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import WasteSorter from './pages/WasteSorter';
 import MiniGames from './pages/MiniGames';
 import InvisibleHeroes from './pages/InvisibleHeroes';
+import FlashcardChallenge from './pages/FlashcardChallenge';
 import Navbar from './components/Navbar';
 import api from './services/api';
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/sorter" element={<WasteSorter user={user} setUser={setUser} />} />
         <Route path="/games" element={<MiniGames />} />
         <Route path="/heroes" element={<InvisibleHeroes />} />
+        <Route path="/flashcard-challenge" element={<FlashcardChallenge />} />
       </Routes>
     </Router>
   );

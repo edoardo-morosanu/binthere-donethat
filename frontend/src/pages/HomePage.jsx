@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CountUp from "../components/Countup";
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import TermsOfServiceModal from "../components/TermsOfServiceModal";
+import Footer from "../components/Footer";
 
 export default function HomePage() {
   useEffect(() => {
@@ -14,6 +17,9 @@ export default function HomePage() {
     const section = document.getElementById(targetId);
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
+
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const handleBrandClick = useCallback((e) => {
     e.preventDefault();
@@ -93,7 +99,7 @@ export default function HomePage() {
               Invisible Heroes
             </h3>
             <p className="text-gray-700">
-              Read first-hand accounts of sanitation staff and their stories.
+              Discover global voices, ordinary people and changemakers, fighting back against a world drowning in waste.
             </p>
             <span className="mt-4 inline-block text-[#27a09e] font-semibold group-hover:text-[#205374]">
               Try It →
@@ -162,46 +168,65 @@ export default function HomePage() {
       <section id="contact" className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-semibold text-[#205374] mb-4">
-            Get In Touch
+            Do you have a story or feedback? Reach out to us!
           </h2>
           <p className="text-gray-700 mb-6">
-            Questions or feedback? Sign up for updates or send us a message.
+            We'd love to hear from you. Share your story, feedback, or questions below.
           </p>
-          <form className="flex flex-col sm:flex-row gap-4">
+          <form
+            className="flex flex-col gap-4 items-center"
+            style={{ maxWidth: 500, margin: '0 auto' }}
+            onSubmit={e => {
+              e.preventDefault();
+              const form = e.target;
+              const data = {
+                name: form.name.value,
+                email: form.email.value,
+                message: form.message.value,
+              };
+              console.log('Homepage contact form submitted:', data);
+              form.reset();
+              alert('Thank you for reaching out!');
+            }}
+          >
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              required
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+            />
             <input
               type="email"
-              placeholder="Your email"
-              className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+              name="email"
+              placeholder="Your Email"
+              required
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+            />
+            <textarea
+              name="message"
+              placeholder="Your message..."
+              required
+              rows={4}
+              className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
             />
             <button
               type="submit"
               className="bg-[#205374] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#1b4561] transition"
             >
-              Subscribe
+              Send Message
             </button>
           </form>
         </div>
       </section>
 
-      <footer className="py-6 bg-[#205374] text-[#d3f5ee]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-          <Link
-            to="/"
-            onClick={handleBrandClick}
-            className="text-[#d3f5ee] hover:text-[#7de393]"
-          >
-            © 2025 Bin There, Done That
-          </Link>
-          <div className="space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-[#7de393]">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-[#7de393]">
-              Terms of Service
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer
+        onOpenPrivacyPolicy={() => setPrivacyOpen(true)}
+        onOpenTermsOfService={() => setTermsOpen(true)}
+        handleBrandClick={handleBrandClick}
+      />
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }
