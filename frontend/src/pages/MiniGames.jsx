@@ -19,7 +19,6 @@ export default function MiniGames() {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
   const fallingTrashGameInfo = {
     title: "Falling Trash",
     subtitle: "Catch recyclables and avoid contaminants in this exciting arcade game!",
@@ -32,8 +31,11 @@ export default function MiniGames() {
     ],
     systemRequirements: [
       "macOS (Apple Silicon)",
-      "Windows (Standard)"
-    ]
+      "Windows (Standard)"    ],
+    downloads: {
+      mac: process.env.REACT_APP_FALLING_TRASH_MAC_DOWNLOAD,
+      windows: process.env.REACT_APP_FALLING_TRASH_WINDOWS_DOWNLOAD
+    }
   };
 
   return (

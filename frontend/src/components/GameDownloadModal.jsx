@@ -65,31 +65,19 @@ function GameDownloadModal({ isOpen, onClose, gameInfo }) {
               ))}
             </ul>
           </div>
-        </div>
-
-        {/* Download Buttons */}
+        </div>        {/* Download Buttons */}
         <div className="text-center mt-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* macOS Download */}
-            <div>
+            <div className="flex flex-col h-full">
               <a
-                href="/downloads/FallingTrash_Mac.zip"
-                download="FallingTrash_Mac.zip"
+                href={gameInfo.downloads?.mac || process.env.REACT_APP_FALLING_TRASH_MAC_DOWNLOAD}
+                rel="noopener noreferrer"
                 className="inline-block w-full bg-[#0071e3] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#0077ed] transition-colors"
-                onClick={e => {
-                  // Fallback: programmatically trigger download if default fails
-                  e.preventDefault();
-                  const link = document.createElement('a');
-                  link.href = '/downloads/FallingTrash_Mac.zip';
-                  link.download = 'FallingTrash_Mac.zip';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
               >
-                <span className="text-2xl mr-2"></span> Download for macOS
+                <span className="text-2xl mr-2">🍎</span> Download for macOS
               </a>
-              <div className="text-left text-gray-500 text-xs mt-2 p-2 bg-gray-50 rounded-md">
+              <div className="text-left text-gray-500 text-xs mt-2 p-2 bg-gray-50 rounded-md flex-1">
                 <p className="font-bold mb-1">Instructions:</p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Unzip the file.</li>
@@ -100,21 +88,21 @@ function GameDownloadModal({ isOpen, onClose, gameInfo }) {
             </div>
 
             {/* Windows Download */}
-            <div>
+            <div className="flex flex-col h-full">
               <a
-                href="/downloads/FallingTrash_Windows_Placeholder.zip"
-                download="FallingTrash_Windows_Placeholder.zip"
+                href={gameInfo.downloads?.windows || process.env.REACT_APP_FALLING_TRASH_WINDOWS_DOWNLOAD}
+                rel="noopener noreferrer"
                 className="inline-block w-full bg-[#00a4ef] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#1fbfff] transition-colors"
               >
                 <span className="text-xl mr-2">⊞</span> Download for Windows
               </a>
-              <div className="text-left text-gray-500 text-xs mt-2 p-2 bg-gray-50 rounded-md">
+              <div className="text-left text-gray-500 text-xs mt-2 p-2 bg-gray-50 rounded-md flex-1">
                 <p className="font-bold mb-1">Instructions:</p>
-                  <ol className="list-decimal list-inside space-y-0.5">
-                    <li>Unzip the file.</li>
-                    <li>Run the <code>.exe</code> file to play.</li>
-                    <li>(Placeholder download for now)</li>
-                  </ol>
+                <ol className="list-decimal list-inside space-y-0.5">
+                  <li>Unzip the file.</li>
+                  <li>Run the <code>.exe</code> file to play.</li>
+                  <li>Windows may show a security warning - click "More info" then "Run anyway"</li>
+                </ol>
               </div>
             </div>
           </div>
@@ -126,4 +114,4 @@ function GameDownloadModal({ isOpen, onClose, gameInfo }) {
   return ReactDOM.createPortal(modalContent, document.body);
 }
 
-export default GameDownloadModal; 
+export default GameDownloadModal;
