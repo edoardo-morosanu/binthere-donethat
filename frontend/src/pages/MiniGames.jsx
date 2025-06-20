@@ -79,10 +79,20 @@ export default function MiniGames() {
               </h2>
             </div>
             <div className="flex-1 p-6 flex flex-col items-center">
-              <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-6">
-                <p className="text-gray-500">
-                  Flashcard game preview placeholder
-                </p>
+              <div className="w-full h-56 bg-gray-100 rounded-lg flex items-center justify-center mb-6 p-6">
+                <div className="relative w-40 h-28">
+                  {/* Back card 2 */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-white rounded-lg shadow-md transform -rotate-12"></div>
+                  {/* Back card 1 */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-white rounded-lg shadow-md transform -rotate-6"></div>
+                  {/* Front card */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-white rounded-lg shadow-lg flex flex-col items-center justify-center p-4 border-2 border-[#7de393]">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-[#205374] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-[#205374] font-semibold text-sm">Quiz</p>
+                  </div>
+                </div>
               </div>
               <Link
                 to="/flashcard-challenge"
