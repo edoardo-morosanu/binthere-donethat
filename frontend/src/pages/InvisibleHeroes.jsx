@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
 import TermsOfServiceModal from "../components/TermsOfServiceModal";
+import { submitContactForm } from "../services/api";
 
 const stories = [
   {
@@ -83,6 +84,9 @@ export default function InvisibleHeroes() {
   const [termsOpen, setTermsOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState("All");
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [contactFormSubmitting, setContactFormSubmitting] = useState(false);
+  const [contactFormMessage, setContactFormMessage] = useState("");
+  const [contactFormError, setContactFormError] = useState("");
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -93,11 +97,36 @@ export default function InvisibleHeroes() {
     // setTimeout(() => setModalVisible(true), 10);
     setComingSoonOpen(true);
   };
-
   const closeModal = () => {
     // setModalVisible(false);
     // setTimeout(() => setModalUrl(null), 300);
     setComingSoonOpen(false);
+  };
+
+  const handleContactFormSubmit = async (e) => {
+    e.preventDefault();
+    setContactFormSubmitting(true);
+    setContactFormError("");
+    setContactFormMessage("");
+
+    const form = e.target;
+    const data = {
+      name: form.name.value,
+      email: form.email.value,
+      message: form.message.value,
+    };
+
+    try {
+      const response = await submitContactForm(data);
+      setContactFormMessage(response.data.message);
+      form.reset();
+    } catch (error) {
+      console.error("Contact form submission error:", error);
+      const errorMessage = error.response?.data?.error || "Something went wrong. Please try again.";
+      setContactFormError(errorMessage);
+    } finally {
+      setContactFormSubmitting(false);
+    }
   };
 
   const handleBrandClick = (e) => {
@@ -196,50 +225,54 @@ export default function InvisibleHeroes() {
 
         {/* Contact Form Section */}
         <section className="max-w-2xl mx-auto my-12 p-8 bg-white rounded-3xl shadow-lg">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#205374] mb-2 text-center">Do you have a story that could make an impact?</h2>
-          <p className="text-gray-700 mb-6 text-center">We'd love to hear from you. If you or someone you know is making a difference or has been affected by the global waste crisis, please reach out to us below.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#205374] mb-2 text-center">Do you have a story that could make an impact?</h2>          <p className="text-gray-700 mb-6 text-center">We'd love to hear from you. If you or someone you know is making a difference or has been affected by the global waste crisis, please reach out to us below.</p>
+          
+          {contactFormMessage && (
+            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              {contactFormMessage}
+            </div>
+          )}
+          
+          {contactFormError && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              {contactFormError}
+            </div>
+          )}
+          
           <form
             className="flex flex-col gap-4"
-            onSubmit={e => {
-              e.preventDefault();
-              const form = e.target;
-              const data = {
-                name: form.name.value,
-                email: form.email.value,
-                message: form.message.value,
-              };
-              // For now, just log the data
-              console.log('Contact form submitted:', data);
-              form.reset();
-              alert('Thank you for reaching out!');
-            }}
+            onSubmit={handleContactFormSubmit}
           >
             <input
               type="text"
               name="name"
               placeholder="Your Name"
               required
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+              disabled={contactFormSubmitting}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e] disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <input
               type="email"
               name="email"
               placeholder="Your Email"
               required
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+              disabled={contactFormSubmitting}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e] disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <textarea
               name="message"
               placeholder="Share your story..."
               required
               rows={4}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e]"
+              disabled={contactFormSubmitting}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#27a09e] disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <button
               type="submit"
-              className="bg-[#27a09e] text-white font-semibold rounded-lg px-6 py-2 hover:bg-[#205374] transition-colors"
+              disabled={contactFormSubmitting}
+              className="bg-[#27a09e] text-white font-semibold rounded-lg px-6 py-2 hover:bg-[#205374] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Send Message
+              {contactFormSubmitting ? "Sending..." : "Send Message"}
             </button>
           </form>
         </section>

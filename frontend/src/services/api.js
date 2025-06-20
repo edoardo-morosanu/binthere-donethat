@@ -25,3 +25,7 @@ export async function confirmDisposal(token) {
     }
   );
 }
+
+export async function submitContactForm(contactData) {
+  return await apiClient.post("/contact/submit", contactData);
+}

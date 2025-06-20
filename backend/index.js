@@ -20,6 +20,7 @@ if (missingEnvVars.length > 0) {
 // Import routes
 const authRoutes = require("./routes/auth");
 const predictionRoutes = require("./routes/prediction");
+const contactRoutes = require("./routes/contact");
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.get("/", (request, response) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/prediction", predictionRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
