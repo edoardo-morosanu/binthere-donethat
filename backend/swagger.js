@@ -17,7 +17,7 @@ const options = {
         description: "Development server",
       },
       {
-        url: "https://your-domain.vercel.app",
+        url: "https://binthere-donethat.vercel.app",
         description: "Production server",
       },
     ],
