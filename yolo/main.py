@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     global model
     try:
         logger.info("Loading YOLO model...")
-        model = YOLO('v1.pt')
+        model = YOLO('v2.pt')
         logger.info("YOLO model loaded successfully.")
         yield
     except Exception as e:
@@ -123,6 +123,12 @@ CLASS_TO_BIN = {
     "apple": "GFT",
     "banana": "GFT",
     "potato": "GFT",
+    "hamburger": "GFT",
+    "fries": "GFT",
+    "pasta": "GFT",
+    "orange": "GFT",
+    "lettuce": "GFT",
+    "pizza": "GFT",
     #Papierbak
     "paper": "Papierbak",
     "book": "Papierbak",
