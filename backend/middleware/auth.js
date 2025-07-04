@@ -52,4 +52,57 @@ const optionalAuthentication = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticateToken, optionalAuthentication };
+/**
+ * Middleware to check if authenticated user is an admin
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Next middleware function
+ */
+const requireAdmin = (req, res, next) => {
+  // Get admin emails from environment variable (comma-separated)
+  const adminEmails =
+    process.env.ADMIN_EMAILS?.split(",").map((email) =>
+      email.trim().toLowerCase()
+    ) || [];
+
+  if (adminEmails.length === 0) {
+    console.error(
+      "No admin emails configured in ADMIN_EMAILS environment variable"
+    );
+    return res.status(500).json({
+      error: "Admin access not configured",
+      success: false,
+    });
+  }
+
+  const userEmail = req.user?.email?.toLowerCase();
+
+  if (!userEmail || !adminEmails.includes(userEmail)) {
+    return res.status(403).json({
+      error: "Admin access required",
+      success: false,
+    });
+  }
+
+  next();
+};
+
+/**
+ * Combined middleware: authenticate token AND check admin status
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Next middleware function
+ */
+const authenticateAdmin = (req, res, next) => {
+  authenticateToken(req, res, (err) => {
+    if (err) return;
+    requireAdmin(req, res, next);
+  });
+};
+
+module.exports = {
+  authenticateToken,
+  optionalAuthentication,
+  requireAdmin,
+  authenticateAdmin,
+};

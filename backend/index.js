@@ -5,7 +5,12 @@ const { connectDB } = require("./config/database");
 const { swaggerUi, specs } = require("./swagger");
 
 // Validate required environment variables
-const requiredEnvVars = ["JWT_SECRET", "MONGODB_URI", "YOLO_API_KEY"];
+const requiredEnvVars = [
+  "JWT_SECRET",
+  "MONGODB_URI",
+  "YOLO_API_KEY",
+  "ADMIN_EMAILS",
+];
 const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {

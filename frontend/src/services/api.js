@@ -29,3 +29,24 @@ export async function confirmDisposal(token) {
 export async function submitContactForm(contactData) {
   return await apiClient.post("/contact/submit", contactData);
 }
+
+// Admin functions for contact message management
+export async function getAllContactMessages(params = {}) {
+  const queryParams = new URLSearchParams();
+
+  if (params.page) queryParams.append("page", params.page);
+  if (params.limit) queryParams.append("limit", params.limit);
+  if (params.isAccepted !== undefined)
+    queryParams.append("isAccepted", params.isAccepted);
+
+  const queryString = queryParams.toString();
+  const url = `/contact/messages${queryString ? `?${queryString}` : ""}`;
+
+  return await apiClient.get(url);
+}
+
+export async function updateContactMessageStatus(messageId, isAccepted) {
+  return await apiClient.patch(`/contact/messages/${messageId}/accept`, {
+    isAccepted,
+  });
+}
