@@ -51,28 +51,6 @@ const stories = [
     imageUrl: "/images/heroes/bali.png",
     videoUrl: "https://www.youtube.com/embed/1nicf4RjU00",
   },
-  {
-    id: "miguel",
-    name: "Miguel Torres",
-    location: "Lima, Peru 🇵🇪",
-    context: "Community Organizer",
-    preview:
-      "We started with five neighbors. Now, every Saturday, dozens join to clear the riverbanks. It's our city, our responsibility.",
-    theme: "Global Crisis",
-    imageUrl: "/images/heroes/peru.png",
-    videoUrl: "https://www.youtube.com/embed/1nicf4RjU00",
-  },
-  {
-    id: "sophia",
-    name: "Sophia Müller",
-    location: "Hamburg, Germany 🇩🇪",
-    context: "Zero Waste Blogger",
-    preview:
-      "My followers think I'm extreme, but every jar of trash I avoid is one less in the North Sea. Change starts with one habit at a time.",
-    theme: "Everyday Impact",
-    imageUrl: "/images/heroes/seatrash.png",
-    videoUrl: "https://www.youtube.com/embed/1nicf4RjU00",
-  },
 ];
 
 const themes = ["All", "Frontlines", "Everyday Impact", "Global Crisis"];
